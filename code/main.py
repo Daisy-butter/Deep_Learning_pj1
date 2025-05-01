@@ -9,7 +9,7 @@ from matplotlib.ticker import MaxNLocator
 import numpy as np
 
 # 数据路径
-data_dir = "C:/Users/31521/OneDrive/桌面/files/academic/FDU/25春大三下/神经网络与深度学习/Deep_Learning/pj_1/dataset/preprocessed"
+data_dir = "C:/Users/31521/OneDrive/桌面/files/academic/FDU/25春大三下/神经网络与深度学习/Deep_Learning_pj1/code/dataset/preprocessed"
 
 X_train = np.load(f"{data_dir}/X_train.npy")
 y_train = np.load(f"{data_dir}/y_train.npy")
@@ -44,11 +44,13 @@ model, best_model, history_train_losses, history_train_accuracies, history_val_l
     dropout_rate=dropout_rate,
     total_epochs=EPOCHS,
     samples_per_batch=batch_size,
-    activation_fn=activation
+    activation_fn=activation,
+    use_momentum=False,
+    momentum_beta=0.9
 )
 
 # 保存最佳模型
-store_model_parameters(best_model, "best_model_sigmoid")
+store_model_parameters(best_model, "best_model_SGD_with_momentum")
 
 # 绘制训练曲线
 f, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
@@ -68,5 +70,5 @@ ax2.legend()
 ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
 ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
 
-plt.savefig("accuracy_and_loss_sigmoid.png")
+plt.savefig("accuracy_and_loss_SGD_with_momentum.png")
 plt.show()

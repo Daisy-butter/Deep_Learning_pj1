@@ -7,4 +7,4 @@ class config:
     beta = 0.001
     batch_size = 256
     EPOCHS = 120
-    activation = 'sigmoid'
+    activation = 'leaky_relu'

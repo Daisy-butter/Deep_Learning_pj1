@@ -10,10 +10,12 @@ def optimize_model_parameters(
     lr_initial, 
     lr_decay, 
     regularisation_strength, 
-    dropout_rate,   # 新增 dropout_rate 参数
+    dropout_rate,
     total_epochs, 
     samples_per_batch, 
-    activation_fn=config.activation
+    activation_fn=config.activation,
+    use_momentum=False,  # New flag to enable/disable momentum
+    momentum_beta=0.9     # Momentum coefficient (common default: 0.9)
 ):
     train_size = training_data.shape[0]
     number_of_batches = train_size // samples_per_batch
@@ -24,6 +26,13 @@ def optimize_model_parameters(
     history_accuracy_val = []
     highest_val_accuracy = 0.0
     optimal_model = network
+
+    # Initialize velocity terms for momentum if needed
+    if use_momentum:
+        velocity = {}
+        for key in network.keys():
+            if key.startswith('W') or key.startswith('b'):
+                velocity[key] = np.zeros_like(network[key])
 
     for epoch in range(total_epochs):
         # Shuffle the training data at the start of each epoch
@@ -58,8 +67,18 @@ def optimize_model_parameters(
                 activation=activation_fn
             )
             
-            # Update parameters
-            network = update_parameters(network, gradients, lr_initial)
+            # Update parameters with or without momentum
+            if use_momentum:
+                for key in gradients.keys():
+                    if key.startswith('dW') or key.startswith('db'):
+                        param_name = key[1:]  # Remove 'd' from gradient key to get parameter name
+                        # Update velocity
+                        velocity[param_name] = momentum_beta * velocity[param_name] + lr_initial * gradients[key]
+                        # Update parameters
+                        network[param_name] -= velocity[param_name]
+            else:
+                # Original SGD update
+                network = update_parameters(network, gradients, lr_initial)
 
         # Evaluate metrics on the training data
         predictions_train, _, _ = model_forward_with_bn(
